@@ -1,3 +1,7 @@
+# --- HW21 addition: second public subnet, required because the ALB must
+# span at least two Availability Zones. Everything else in the VPC is
+# untouched. ---
+
 resource "aws_subnet" "public_app_b" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.18.4.0/24"

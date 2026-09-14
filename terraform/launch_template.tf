@@ -1,3 +1,7 @@
+# Launch template: replaces the standalone aws_instance.app in compute.tf.
+# Reuses the same data.aws_ami.ubuntu and aws_key_pair.deployer already
+# defined in compute.tf — do not redeclare them here.
+
 resource "aws_launch_template" "app" {
   name_prefix   = "${var.project_prefix}-app-"
   image_id      = data.aws_ami.ubuntu.id
@@ -14,10 +18,11 @@ resource "aws_launch_template" "app" {
     }
   }
 
+  # Safe instance metadata settings: require IMDSv2.
   metadata_options {
     http_tokens                 = "required"
     http_put_response_hop_limit = 1
-    http_endpoint               = "enabled"
+    http_endpoint                = "enabled"
   }
 
   # IMPORTANT: your app is currently deployed by a separate CI/CD step that

@@ -1,3 +1,7 @@
+# ALB security group: the new public entry point.
+# app_sg (in network.tf) needs to be edited separately — see chat
+# instructions — to only trust this SG for port 80 instead of 0.0.0.0/0.
+
 resource "aws_security_group" "alb_sg" {
   name        = "${var.project_prefix}-alb-sg"
   description = "Security group for the public application load balancer"
