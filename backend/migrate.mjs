@@ -1,0 +1,4 @@
+import pg from 'pg';import {readFile} from 'node:fs/promises';
+const client=new pg.Client({connectionString:process.env.DATABASE_URL});
+await client.connect();
+try{await client.query('BEGIN');await client.query('SELECT pg_advisory_xact_lock(71926001)');await client.query('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW())');const {rows}=await client.query("SELECT version FROM schema_migrations WHERE version='001'");if(!rows.length){await client.query(await readFile(new URL('../db/migrations/001_postgres.sql',import.meta.url),'utf8'));await client.query("INSERT INTO schema_migrations(version) VALUES ('001')")}await client.query('COMMIT');console.log('Database migrations ready.')}catch(e){await client.query('ROLLBACK');throw e}finally{await client.end()}

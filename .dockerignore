@@ -1,0 +1,12 @@
+node_modules
+backend/node_modules
+.git
+.openai
+.sites-runtime
+.wrangler
+dist
+docker-dist
+.env
+.env.local
+outputs
+*.zip
