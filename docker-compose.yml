@@ -9,17 +9,28 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     environment:
-      DATABASE_URL: postgres://knight:${POSTGRES_PASSWORD:-knight_local_dev_only}@db:5432/last_knight
+      PORT: "3000"
+      DATABASE_URL: "postgres://knight:${POSTGRES_PASSWORD:-knight_local_dev_only}@db:5432/last_knight"
       COOKIE_SECURE: "${COOKIE_SECURE:-false}"
+    ports:
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\" "]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     restart: unless-stopped
+
   db:
     image: postgres:16-alpine
     environment:
@@ -35,6 +46,7 @@ services:
       retries: 10
     restart: unless-stopped
     ports:
-      - 5432:542
+      - "5432:5432"
+
 volumes:
   knight_data:

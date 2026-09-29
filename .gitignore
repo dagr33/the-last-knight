@@ -15,9 +15,18 @@
 /.next/
 /out/
 
+# build artifacts
+/dist/
+/docker-dist/
+/.wrangler/
+/.sites-runtime/
+/outputs/
+/work/
+
 # misc
 .DS_Store
 *.pem
+*.zip
 
 # debug
 npm-debug.log*
@@ -25,26 +34,20 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# environment files
+.env
+.env.*
+!.env.example
+!.env.aws.example
 
 # vercel
 .vercel
 
 # typescript
 next-env.d.ts
-/dist/
-/.wrangler/
-/.sites-runtime/
-/outputs/
-/work/
-!/.env.example
-/backend/node_modules/
-/docker-dist/
-
 *.tsbuildinfo
 
-# Terraform local files and secrets
+# Terraform and cloud local files
 **/.terraform/
 *.tfstate
 *.tfstate.*
@@ -52,17 +55,11 @@ next-env.d.ts
 *.tfvars.json
 tfplan
 *.tfplan
+.terraform.lock.hcl
 
-# Terraform local files
-**/.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-*.tfvars
+# Docker local data
+.docker/
 
-
-# Terraform local files
-**/.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
+# local AWS credentials or temporary config
+*.pem
+aws-config.json
