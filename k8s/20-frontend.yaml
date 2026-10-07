@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  namespace: your-project
+  labels:
+    app: frontend
+spec:
+  containers:
+    - name: frontend
+      image: last-knight-frontend:latest
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: your-project
+spec:
+  selector:
+    app: frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  type: NodePort

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: your-project
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  namespace: your-project
+  labels:
+    app: postgres
+spec:
+  containers:
+    - name: postgres
+      image: postgres:15-alpine
+      ports:
+        - containerPort: 5432
+      env:
+        - name: POSTGRES_DB
+          value: last_knight
+        - name: POSTGRES_USER
+          value: knight
+        - name: POSTGRES_PASSWORD
+          value: knight_local_dev_only
+      volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: postgres-data
+      persistentVolumeClaim:
+        claimName: postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: your-project
+spec:
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
