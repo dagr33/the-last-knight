@@ -1,23 +1,40 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: frontend
-  namespace: your-project
-  labels:
-    app: frontend
+  namespace: hw28
 spec:
-  containers:
-    - name: frontend
-      image: last-knight-frontend:latest
-      imagePullPolicy: IfNotPresent
-      ports:
-        - containerPort: 80
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: last-knight-frontend:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          ports:
+            - containerPort: 80
+          env:
+            - name: BACKEND_URL
+              value: "http://backend-service:3000"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
-  namespace: your-project
+  namespace: hw28
 spec:
   selector:
     app: frontend
