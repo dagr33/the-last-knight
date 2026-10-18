@@ -75,3 +75,8 @@ terraform/*.tfstate.backup
 .minikube/
 .kube/
 *.kubeconfig
+
+# Secrets, TLS and database dumps
+*.key
+*.crt
+*.dump
