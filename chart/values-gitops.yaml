@@ -1,0 +1,7 @@
+# Managed by HW36 GitHub Actions after successful lint/test/build.
+frontend:
+  image:
+    tag: "bootstrap"
+backend:
+  image:
+    tag: "bootstrap"

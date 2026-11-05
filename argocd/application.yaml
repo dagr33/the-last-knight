@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: last-knight
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dagr33/the-last-knight.git
+    targetRevision: hw36
+    path: chart
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-gitops.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hw36
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
