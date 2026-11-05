@@ -1,0 +1,23 @@
+
+frontend:
+  replicaCount: 2
+  image:
+    repository: last-knight-frontend
+    tag: bootstrap
+    pullPolicy: Never
+  service:
+    port: 80
+backend:
+  replicaCount: 2
+  image:
+    repository: last-knight-backend
+    tag: bootstrap
+    pullPolicy: Never
+  service:
+    port: 3000
+postgres:
+  image: postgres:16-alpine
+  database: last_knight
+  username: knight
+  secretName: last-knight-db 
+  storage: 1Gi

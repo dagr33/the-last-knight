@@ -1,0 +1,78 @@
+name: HW36 - The Last Knight GitOps CI
+
+on:
+  push:
+    branches: [hw36, main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    name: Lint app and Helm
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Application lint (fail on error)
+        run: npm run lint
+      - name: Helm lint (fail on error)
+        run: helm lint ./chart -f ./chart/values-gitops.yaml
+
+  test:
+    name: Run project tests
+    needs: lint
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests (fail on error)
+        run: npm test
+
+  build:
+    name: Build SHA images and update GitOps desired state
+    needs: test
+    runs-on: self-hosted
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute immutable image tag
+        run: echo "SHORT_SHA=$(git rev-parse --short=8 HEAD)" >> "$GITHUB_ENV"
+      - name: Build backend
+        run: docker build -f backend/Dockerfile -t "last-knight-backend:${SHORT_SHA}" .
+      - name: Build frontend
+        run: docker build -f frontend/Dockerfile -t "last-knight-frontend:${SHORT_SHA}" .
+      - name: Cache images in local Minikube (branch pushes only)
+        if: github.event_name == 'push'
+        run: |
+          minikube status
+          minikube image load "last-knight-backend:${SHORT_SHA}"
+          minikube image load "last-knight-frontend:${SHORT_SHA}"
+      - name: Commit desired image tags (branch pushes only)
+        if: github.event_name == 'push'
+        run: |
+          python scripts/hw36-update-values.py "$SHORT_SHA"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add chart/values-gitops.yaml
+          if git diff --cached --quiet; then
+            echo 'GitOps image tags unchanged.'
+          else
+            git commit -m "chore(gitops): deploy ${SHORT_SHA} [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
