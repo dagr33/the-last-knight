@@ -1,0 +1,7 @@
+import {sql} from 'drizzle-orm';
+import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
+export const users=sqliteTable('users',{id:text('id').primaryKey(),username:text('username').notNull().unique(),email:text('email').notNull().unique(),password_hash:text('password_hash').notNull(),created_at:integer('created_at').notNull()},t=>[uniqueIndex('users_username_lower').on(sql`lower(${t.username})`)]);
+export const authSessions=sqliteTable('auth_sessions',{token_hash:text('token_hash').primaryKey(),user_id:text('user_id').notNull().references(()=>users.id,{onDelete:'cascade'}),expires_at:integer('expires_at').notNull()});
+export const games=sqliteTable('games',{id:text('id').primaryKey(),user_id:text('user_id').notNull().references(()=>users.id,{onDelete:'cascade'}),started_at:integer('started_at').notNull()},t=>[index('games_user_idx').on(t.user_id)]);
+export const results=sqliteTable('results',{id:text('id').primaryKey(),game_id:text('game_id').notNull().references(()=>games.id).unique(),user_id:text('user_id').notNull().references(()=>users.id,{onDelete:'cascade'}),score:integer('score').notNull(),wave:integer('wave').notNull(),kills:integer('kills').notNull(),duration:integer('duration').notNull(),created_at:integer('created_at').notNull()},t=>[index('results_rank_idx').on(t.score),index('results_user_idx').on(t.user_id)]);
+export const limits=sqliteTable('rate_limits',{key:text('key').primaryKey(),count:integer('count').notNull(),expires_at:integer('expires_at').notNull()});
