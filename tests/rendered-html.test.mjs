@@ -1,5 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { register } from "node:module";
+import { pathToFileURL } from "node:url";
+
+try {
+  const loaderCode = `
+export async function resolve(specifier, context, nextResolve) {
+  if (specifier === "cloudflare:workers" || specifier.startsWith("cloudflare:")) {
+    return {
+      shortCircuit: true,
+      url: "data:text/javascript," + encodeURIComponent("export const env = {}; export default { env: {} };")
+    };
+  }
+  return nextResolve(specifier, context);
+}
+`;
+  register("data:text/javascript," + encodeURIComponent(loaderCode), pathToFileURL("./"));
+} catch {}
 
 const developmentPreviewMeta =
   /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
